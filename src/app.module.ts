@@ -5,6 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import config from './config';
 import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
+import { NewsModule } from './modules/news/news.module';
 
 @Module({
   imports: [
@@ -16,8 +18,16 @@ import { AuthModule } from './modules/auth/auth.module';
       autoLoadEntities: true,
       logging: true,
     }),
+    JwtModule.register({
+      global: true,
+      secret: config.jwtSecret,
+      signOptions: {
+        expiresIn: '1d',
+      },
+    }),
     UserModule,
     AuthModule,
+    NewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
