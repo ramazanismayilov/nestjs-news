@@ -6,9 +6,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { CategoryEntity } from './Category.entity';
 
 
 @Entity('news')
@@ -42,6 +44,12 @@ export class NewsEntity extends BaseEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column()
+  categoryId: number
+
+  @ManyToOne(() => CategoryEntity, (item: CategoryEntity) => item.news)
+  category: CategoryEntity
 
   @BeforeInsert()
   @BeforeUpdate()
