@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { NewsEntity } from "src/entities/News.entity";
-import { FindOptionsWhere, Repository } from "typeorm";
+import { FindOptionsOrder, FindOptionsWhere, Repository } from "typeorm";
 import { CreateNewsDto } from "./dto/create-news.dto";
 import { CategoryService } from "../category/category.service";
 import { UpdateNewsDto } from "./dto/update-news.dto";
@@ -19,14 +19,42 @@ export class NewsService {
         private newsActionHistoryRepo: Repository<NewsActionHistory>
     ) { }
 
-    list(params: NewsListQueryDto) {
+    async list(params: NewsListQueryDto) {
         let where: FindOptionsWhere<NewsEntity> = {}
+        let order: FindOptionsOrder<NewsEntity> = {}
+
+        if (params.popular) {
+            order = {
+                views: 'DESC',
+                createdAt: 'DESC'
+            }
+        } else if (params.top) {
+            order = {
+                like: 'DESC',
+                createdAt: 'DESC'
+            }
+        } else {
+            order = {
+                createdAt: 'DESC'
+            }
+        }
 
         if (params.category) {
             where.categoryId = params.category
         }
 
-        return this.newsRepo.find({ where, relations: ['category'], order: { createdAt: 'DESC' } })
+        let [news, total] = await this.newsRepo.findAndCount({
+            where,
+            relations: ['category'],
+            order,
+            take: params.limit,
+            skip: (params.page - 1) * params.limit
+        })
+
+        return {
+            news,
+            total
+        }
     }
 
     async create(params: CreateNewsDto) {
