@@ -17,4 +17,8 @@ export class UserService {
   findUserById(id: number) {
     return this.userRepo.findOne({ where: { id } });
   }
+
+  createGuest(){
+    
+  }
 }

@@ -7,6 +7,8 @@ import { UpdateNewsDto } from "./dto/update-news.dto";
 import { NewsListQueryDto } from "./dto/list-news.dto";
 import { NewsActionType } from "./news.types";
 import { AuthorizedUser } from "../auth/auth.types";
+import { UserRole } from "../user/user.types";
+import { Roles } from "src/shared/decorator/role.decorator";
 
 @Controller('news')
 export class NewsController {
@@ -20,6 +22,7 @@ export class NewsController {
     @Post()
     @ApiBearerAuth()
     @UseGuards(AuthGuard)
+    @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
     create(@Body() body: CreateNewsDto) {
         return this.newsService.create(body)
     }
@@ -27,6 +30,7 @@ export class NewsController {
     @Post(':id')
     @ApiBearerAuth()
     @UseGuards(AuthGuard)
+    @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
     update(@Param('id') id: number, @Body() body: UpdateNewsDto) {
         return this.newsService.update(id, body)
     }
@@ -34,6 +38,7 @@ export class NewsController {
     @Post(':id/action/:type')
     @ApiBearerAuth()
     @UseGuards(AuthGuard)
+    @Roles(UserRole.GUEST)
     action(@Param('id') id: number, @Param('type') type: NewsActionType, @Req() req: AuthorizedUser) {
         return this.newsService.action(id, type, req.user.id)
     }
